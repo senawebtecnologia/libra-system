@@ -3,6 +3,21 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+$mysqlBase = [
+    'driver' => 'mysql',
+    'host' => env('DB_HOST', '127.0.0.1'),
+    'port' => env('DB_PORT', '3306'),
+    'username' => env('DB_USERNAME', 'root'),
+    'password' => env('DB_PASSWORD', ''),
+    'unix_socket' => env('DB_SOCKET', ''),
+    'charset' => 'utf8mb4',
+    'collation' => 'utf8mb4_unicode_ci',
+    'prefix' => '',
+    'prefix_indexes' => true,
+    'strict' => true,
+    'engine' => null,
+];
+
 return [
 
     /*
@@ -17,7 +32,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION', 'central'),
 
     /*
     |--------------------------------------------------------------------------
@@ -32,6 +47,21 @@ return [
 
     'connections' => [
 
+        // Banco central: tenants, catálogo de módulos, super admin
+        'central' => array_merge($mysqlBase, [
+            'database' => env('DB_DATABASE', 'libra_core'),
+        ]),
+
+        // Modelo de configuração: o TenantManager copia e preenche o banco
+        'tenant_template' => array_merge($mysqlBase, [
+            'database' => null,
+        ]),
+
+        // Conexão ativa do tenant: reescrita em tempo de execução
+        'tenant' => array_merge($mysqlBase, [
+            'database' => env('LIBRA_SHARED_DATABASE', 'libra_shared'),
+        ]),
+    
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
